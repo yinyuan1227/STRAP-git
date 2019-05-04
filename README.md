@@ -35,20 +35,22 @@ Written mainly by [Eigen](https://eigen.tuxfamily.org/dox/index.html), which is 
 - emb_path: path to save embedding files
 - alpha: parameter for *PPR*
 - mode
-	- 1: $SPPR(u,v) = log_{10}(PPR(u,v)+PPR^T(v,u))$
-	- 2: $SPPR(u,v) = log_{10}(log_{10}(PPR(u,v)+PPR^T(v,u)))$
-	- 3: $SPPR(u,v) = PPR(u,v)+PPR^T(v,u)$
+	- 1: take *log* of each value
+	- 2: take *loglog* of each value
+	- 3: do nothing
 - iteration: parameter for *SVD*
 - error: parameter for *Backward Push*
 - threads
 
 **Examples**
 
-For undirected graph:```
+For undirected graph:
+```
 ./STRAP_SVD_U BlogCatalog-u NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
 ```
 
-For directed graph:```
+For directed graph:
+```
 ./STRAP_SVD_D wikivote NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
 ```
 
@@ -71,11 +73,13 @@ Others are the same as above.
 
 **Examples**
 
-For undirected graph:```
+For undirected graph:
+```
 ./STRAP_FRPCA_U BlogCatalog-u NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
 ```
 
-For directed graph:```
+For directed graph:
+```
 ./STRAP_FRPCA_D wikivote NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
 ```
 
