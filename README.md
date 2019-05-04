@@ -8,11 +8,11 @@
 
 
 ## Preparation
-Place the prepared data [file].txt in the [NR_Dataset](). Note that the first row of data is the node size and each row is the information of each edge [outNode] [inNode].
+Place the prepared data [file].txt in the [NR_Dataset](https://github.com/yinyuan1227/STRAP-git/tree/master/NR_Dataset). Note that the first row of data is the node size and each row is the information of each edge [outNode] [inNode].
 
 Besides, directed graph and undirected graph should be distinguished. 
 
-Datasets used in our paper are provided in [NR_Dataset]().
+Datasets used in our paper are provided in [NR_Dataset](https://github.com/yinyuan1227/STRAP-git/tree/master/NR_Dataset).
 
 
 ## Compilations
@@ -95,7 +95,7 @@ Train the embeddings of a full graph and then reconstruct it. The code to calcul
 For big graphs, like *YouTube*, we sample a subgraph to do reconstruction. 
 
 ### Link Prediction
-First, split the graph into training/testing set and generate negative samples. Datasets will be saved into [LP_Dataset]() separately. The ratio of testing part can be assigned:
+First, split the graph into training/testing set and generate negative samples. Datasets will be saved into [LP_Dataset](https://github.com/yinyuan1227/STRAP-git/tree/master/LP_Dataset) separately. The ratio of testing part can be assigned:
  
 ```
 ./GEN_DATA_U BlogCatalog-u 0.5
