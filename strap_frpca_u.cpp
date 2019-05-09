@@ -7,7 +7,6 @@ extern "C"
 
 #include <algorithm>
 #include <iostream>
-
 #include <sstream>
 #include <cstdlib>
 #include <deque>
@@ -30,9 +29,7 @@ bool maxScoreCmpTriplet(const Triplet<double>& a, const Triplet<double>& b){
   return a.value() > b.value();
 }
 
-const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
-
-void BackwardSearch(int*random_w, int start, int end, UGraph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
+void BackwardSearch(int* random_w, int start, int end, UGraph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
   // Computing all node PPR on G
   double* Residue = new double[g->n];
   double* Reserve = new double[g->n];
@@ -61,7 +58,7 @@ void BackwardSearch(int*random_w, int start, int end, UGraph* g, double alpha, d
         Residue[tempNode] = 0;
         Reserve[tempNode] += alpha* tempResidue;
         touch_set->Push(tempNode);
-          
+
         for(int k = 0; k < inSize; k++){
           int newNode = g->AdjList[tempNode][k];
           Residue[newNode] += tempResidue * (1-alpha) / (double)g->degree[newNode];
@@ -88,8 +85,6 @@ void BackwardSearch(int*random_w, int start, int end, UGraph* g, double alpha, d
 }
 
 
-
-
 int main(int argc,  char **argv){
   auto start_time = std::chrono::system_clock::now();
   srand((unsigned)time(0));
@@ -106,25 +101,14 @@ int main(int argc,  char **argv){
   g.inputGraph(dataset);
   clock_t start = clock();
   double alpha = strtod(argv[4], &endptr);
-  int mode = strtod(argv[5], &endptr);
-  int pass = strtod(argv[6], &endptr);
-  double backward_theta = strtod(argv[7], &endptr);
-  int NUMTHREAD = strtod(argv[8], &endptr);;
+  int pass = strtod(argv[5], &endptr);
+  double backward_theta = strtod(argv[6], &endptr);
+  int NUMTHREAD = strtod(argv[7], &endptr);;
   double residuemax = backward_theta; // PPR error up to residuemax
   double reservemin = backward_theta; // Retain approximate PPR larger than reservemin
   cout << "alpha: " << alpha << " residuemax: " << residuemax << " reservemin: " << reservemin <<endl;
 
   int d = 128;
-
-  if (mode == 1){
-    cout << "log PPR + TPPR" << endl;
-  }
-  if (mode == 2){
-    cout << "loglog PPR + TPPR" << endl;
-  }
-  if (mode == 3){
-    cout << "PPR + TPPR" << endl;
-  }
 
   int* random_w = new int[g.n];
   for(int i = 0; i < g.n; i++){
@@ -193,6 +177,7 @@ int main(int argc,  char **argv){
   }
 
   cout << "deque to sparse matrix" << endl;
+  // Rewrite SparseMatrix::setFromTriplets to optimize memory usage
   SparseMatrix<double, RowMajor, long> ppr_matrix_temp(g.n, g.n);
   SparseMatrix<double, ColMajor, long> trMat(g.n, g.n);
   deque<Triplet<double>>::iterator it;
@@ -251,22 +236,12 @@ int main(int argc,  char **argv){
 
   for (int k=0; k<ppr_matrix_temp.outerSize(); ++k){
     for (SparseMatrix<double, RowMajor, long int>::InnerIterator it(ppr_matrix_temp,k); it; ++it){
-      double value1;
-      if(mode == 1){
-        value1 = log10(it.value()/reservemin);
-      }
-      if(mode == 2){
-        value1 =  log10( max(1.0, g.n*log10( max(1.0, (double)g.n*it.value()))));
-      }
-      if(mode == 3){
-        value1 =  it.value();
-      }
-      if( value1 > 0.0) {
-        ppr_matrix_coo->rows[nnz_iter] = it.row() + 1;
-        ppr_matrix_coo->cols[nnz_iter] = it.col() + 1;
-        ppr_matrix_coo->values[nnz_iter] = value1;
-        ppr_norm += ppr_matrix_coo->values[nnz_iter]*ppr_matrix_coo->values[nnz_iter];
-        nnz_iter ++;
+      double value1 = log10(it.value()/reservemin);
+      ppr_matrix_coo->rows[nnz_iter] = it.row() + 1;
+      ppr_matrix_coo->cols[nnz_iter] = it.col() + 1;
+      ppr_matrix_coo->values[nnz_iter] = value1;
+      ppr_norm += ppr_matrix_coo->values[nnz_iter]*ppr_matrix_coo->values[nnz_iter];
+      nnz_iter ++;
       }
     }
   }
@@ -278,14 +253,14 @@ int main(int argc,  char **argv){
   cout << "sparse to coo time: "<< elapsed_sparse_coo_time.count() << endl;
 
 
-  // Transform  frPCAt:COO tp frPCAt:CSR
+  // Transform  frPCAt:COO to frPCAt:CSR
   mat_csr* ppr_matrix = csr_matrix_new();
   csr_init_from_coo(ppr_matrix, ppr_matrix_coo);
   cout << "nnz: " << ppr_matrix->nnz << " nrows: " <<ppr_matrix->nrows << " ncols: "<<ppr_matrix->ncols << endl;
   coo_matrix_delete(ppr_matrix_coo);
 
 
-  // Comput SVD using frPCAt
+  // Compute SVD using frPCAt
   mat *U = matrix_new(g.n, d);
   mat *S = matrix_new(d, 1);
   mat *V = matrix_new(g.n, d);
@@ -294,12 +269,12 @@ int main(int argc,  char **argv){
   cout << "coo to csr time: "<< elapsed_coo_csr_time.count() << endl;
   auto elapsed_trans_time = chrono::duration_cast<std::chrono::seconds>(svd_start_time - start_ppr_matrix_time);
   cout << "total ppr to matrix time: "<< elapsed_trans_time.count() << endl;
-  cout << "start svd..." << endl;
+  cout << "start pca..." << endl;
 
   frPCAt(ppr_matrix, &U, &S, &V, d, pass);
   auto end_eb_time = chrono::system_clock::now();
   auto elapsed_svd_time = chrono::duration_cast<std::chrono::seconds>(end_eb_time - svd_start_time);
-  cout << "svd time: "<< elapsed_svd_time.count() << endl;
+  cout << "pca time: "<< elapsed_svd_time.count() << endl;
 
   double S_norm = 0;
   double* signS = new double[d];
@@ -313,21 +288,21 @@ int main(int argc,  char **argv){
     S_norm += S->d[d-i-1]*S->d[d-i-1];
   }
   cout << S_norm << " " << ppr_norm << " ratio: " << (double)S_norm/ppr_norm << endl;
-  for(int i=0; i<g.n; i++){
-    for(int j=1; j<d; j++){
+  for(int i = 0; i < g.n; i++){
+    for(int j = 1; j < d; j++){
       double val = matrix_get_element(U, i, d-j-1)*sqrt(abs(S->d[d-j-1]))*signS[d-j-1];
       outU << val << ", ";
     }
     double val_last = matrix_get_element(U, i, d-1)*sqrt(abs(S->d[d-1]))*signS[d-1];
     outU << val_last << endl;
   }
-  for(int i=0; i<g.n; i++){
-    for(int j=1; j<d; j++){
+  for(int i = 0; i < g.n; i++){
+    for(int j = 1; j < d; j++){
       double val = matrix_get_element(V, i, d-j-1)*sqrt(abs(S->d[d-j-1]));
       outV << val << ", ";
     }
     double val_last = matrix_get_element(V, i, d-1)*sqrt(abs(S->d[d-1]));
-    outV<< val_last << endl;
+    outV << val_last << endl;
   }
   auto end_time = chrono::system_clock::now();
   auto elapsed_write_time = chrono::duration_cast<std::chrono::seconds>(end_time - end_eb_time);

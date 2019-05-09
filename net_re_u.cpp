@@ -1,13 +1,9 @@
 #include <algorithm>
 #include <iostream>
-#include <string>
 #include <sstream>
-#include <cstdlib>
 #include <vector>
 #include <unordered_map>
 #include "Graph.h"
-#include <fstream>
-#include <cstring>
 #include "Eigen/Dense"
 #include "SVD.h"
 
@@ -37,11 +33,6 @@ bool maxScoreCmp(const pair<double, pair<int, int>> &a, const pair<double, pair<
   return a.first > b.first;
 }
 
-bool maxScoreCmpPair(const pair<int, double> &a, const pair<int, double> &b) {
-  return a.second > b.second;
-}
-
-
 const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
 
 
@@ -70,12 +61,13 @@ int main(int argc, char **argv) {
   }
   random_shuffle(edge_vec.begin(), edge_vec.end());
 
-  //sample a subgraph using random edge induction method
+  // if graph size > 100000, use sampled graph, otherwise use original graph
+  // sample a subgraph using random edge induction method
   srand((unsigned) time(0));
   cout << "Constructing sample graph using edge induction..." << endl;
   int sample_init_m = g.m;
   if (g.n >= 100000) {
-    sample_init_m = min(100000, g.m); //if graph size > 50000, use sampled graph, otherwise use original graph
+    sample_init_m = min(100000, g.m);
   }
 
   //use the end points of sampled edge to induce a graph
@@ -129,7 +121,6 @@ int main(int argc, char **argv) {
   }
   clock_t start_sample_reconstruction = clock();
 
-
   MatrixXd appr_matrix_sample = Usample * Vsample.transpose();
   clock_t end_sample_reconstruction = clock();
   vector<pair<double, pair<int, int>>> all_appr_sample;
@@ -143,8 +134,7 @@ int main(int argc, char **argv) {
   int predict_positive_number_appr_sample = 0;
   for (int k = 0; k < 10; k++) {
     for (int i = 0; i < display_step; i++) {
-      if (adjMatrix_sample.Find(all_appr_sample[k * display_step + i].second.first,
-                                all_appr_sample[k * display_step + i].second.second)) {
+      if (adjMatrix_sample.Find(all_appr_sample[k * display_step + i].second.first, all_appr_sample[k * display_step + i].second.second)) {
         predict_positive_number_appr_sample += 1;
       }
     }

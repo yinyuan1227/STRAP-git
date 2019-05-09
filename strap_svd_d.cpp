@@ -23,10 +23,7 @@ bool maxScoreCmpTriplet(const Triplet<double>& a, const Triplet<double>& b){
   return a.value() > b.value();
 }
 
-
-const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
-
-void BackwardSearch(int*random_w, int start, int end, Graph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
+void BackwardSearch(int* random_w, int start, int end, Graph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
   // Computing all node PPR on G
   double* Residue = new double[g->n];
   double* Reserve = new double[g->n];
@@ -75,7 +72,7 @@ void BackwardSearch(int*random_w, int start, int end, Graph* g, double alpha, do
 }
 
 
-void BackwardSearchT(int*random_w, int start, int end, Graph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
+void BackwardSearchT(int* random_w, int start, int end, Graph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
   double* Residue = new double[g->n];
   double* Reserve = new double[g->n];
   Node_Set* candidate_set = new Node_Set(g->n);
@@ -141,26 +138,14 @@ int main(int argc,  char **argv){
   g.inputGraph(dataset);
   clock_t start = clock();
   double alpha = strtod(argv[4], &endptr);
-  int mode = strtod(argv[5], &endptr);
-  int pass = strtod(argv[6], &endptr);
-  double backward_theta = strtod(argv[7], &endptr);
-  int NUMTHREAD = strtod(argv[8], &endptr);;
+  int pass = strtod(argv[5], &endptr);
+  double backward_theta = strtod(argv[6], &endptr);
+  int NUMTHREAD = strtod(argv[7], &endptr);;
   double residuemax = backward_theta; // PPR error up to residuemax
   double reservemin = backward_theta; // Retain approximate PPR larger than reservemin
   cout << "alpha: " << alpha << " residuemax: " << residuemax << " reservemin: " << reservemin <<endl;
 
   int d = 128;
-
-  if (mode == 1){
-    cout << "log PPR + TPPR" << endl;
-  }
-  if (mode == 2){
-    cout << "loglog PPR + TPPR" << endl;
-  }
-  if (mode == 3){
-    cout << "PPR + TPPR" << endl;
-  }
-
 
   int* random_w = new int[g.n];
   for(int i = 0; i < g.n; i++){
@@ -246,12 +231,12 @@ int main(int argc,  char **argv){
   }
 
   cout << "deque to sparse matrix" << endl;
+  // Rewrite SparseMatrix::setFromTriplets to optimize memory usage
   SparseMatrix<float> ppr_matrix(g.n, g.n);
   SparseMatrix<float> trMat(g.n, g.n);
   deque<Triplet<double>>::iterator it;
   long max_step = nnz / 2 + 1;
   long step = 0;
-  float vtmp;
   while (nnz){
     SparseMatrix<float>::IndexVector wi(trMat.outerSize());
     wi.setZero();
@@ -271,17 +256,7 @@ int main(int argc,  char **argv){
 
     for (int j = 0; j < step; j++){
       it = TotalTripletList.begin();
-      if(mode == 1){
-        //vtmp = (float)log10( max(1.0, it->value() / reservemin));
-        vtmp = (float)log10(it->value() / reservemin);
-      }
-      if(mode == 2){
-        vtmp = (float)log10( max(1.0, g.n*log10( max(1.0, (double)g.n*it->value()))));
-      }
-      if(mode == 3){
-        vtmp = (float)it->value();
-      }
-      trMat.insertBackUncompressed(it->row(), it->col()) = vtmp;
+      trMat.insertBackUncompressed(it->row(), it->col()) = (float)log10(it->value() / reservemin);
       TotalTripletList.erase(TotalTripletList.begin());
     }
 
@@ -293,13 +268,14 @@ int main(int argc,  char **argv){
   trMat.resize(0, 0);
   trMat.data().squeeze();
 
+
   auto svd_start_time = chrono::system_clock::now();
   auto elapsed_deque_to_sparse_time = chrono::duration_cast<std::chrono::seconds>(svd_start_time - merge_ppr_time);
   cout << "deque to sparse time: "<< elapsed_deque_to_sparse_time.count() << endl;
   cout << "start svd..." << endl;
 
 
-  // Comput SVD
+  // Compute SVD
   SVD::SVD<SparseMatrix<float>> svd(ppr_matrix, d, pass);
   auto end_eb_time = chrono::system_clock::now();
   auto elapsed_svd_time = chrono::duration_cast<std::chrono::seconds>(end_eb_time - svd_start_time);

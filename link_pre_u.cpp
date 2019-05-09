@@ -1,13 +1,9 @@
 #include <algorithm>
 #include <iostream>
-#include <string>
 #include <sstream>
-#include <cstdlib>
 #include <vector>
 #include <unordered_set>
 #include "Graph.h"
-#include <fstream>
-#include <cstring>
 #include "Eigen/Dense"
 #include "SVD.h"
 #include <boost/functional/hash.hpp>
@@ -36,10 +32,6 @@ bool maxScoreCmp(const pair<double, pair<int, int>>& a, const pair<double, pair<
     return a.first > b.first;
 }
 
-bool maxScoreCmpPair(const pair<int, double>& a, const pair<int, double>&  b){
-    return a.second < b.second;
-}
-
 
 int main(int argc,  char **argv){
   srand((unsigned)time(0));
@@ -55,6 +47,7 @@ int main(int argc,  char **argv){
   unordered_set<pair<int, int>, boost::hash< pair<int, int>>> pedge_set;
   unordered_set<pair<int, int>, boost::hash< pair<int, int>>> nedge_set;
 
+  // Load in positive and negative test sets
   int n = 0;
   ptest >> n;
   ntest >> n;
@@ -66,18 +59,19 @@ int main(int argc,  char **argv){
     pedge_set.insert(make_pair(from, to));
     sample_m++;
   }
-  int sample_m2 = 0;
   while(ntest.good()){
     int from;
     int to;
     ntest >> from >> to;
     nedge_set.insert(make_pair(from, to));
-    sample_m2++;
   }
+
+  // Load in embeddings
   MatrixXf U = load_csv<MatrixXf>(inUfile);
   MatrixXf V = load_csv<MatrixXf>(inVfile);
-  int d = U.cols();
 
+  // Compute predicted score
+  int d = U.cols();
   vector<pair<double, pair<int, int>>> embedding_score;
   for (auto it = pedge_set.begin(); it != pedge_set.end(); ++it) {
     int i = it->first;
@@ -91,17 +85,19 @@ int main(int argc,  char **argv){
     double score = U.row(i).dot(V.row(j));    
     embedding_score.push_back(make_pair(score, make_pair(i,j)));
   }
-  nth_element(embedding_score.begin(), embedding_score.begin()+sample_m -1, embedding_score.end(), maxScoreCmp);
-  sort(embedding_score.begin(), embedding_score.begin() + sample_m -1, maxScoreCmp);
+
+  // Top sample_m predicted edges is considered
+  nth_element(embedding_score.begin(), embedding_score.begin()+sample_m-1, embedding_score.end(), maxScoreCmp);
+  sort(embedding_score.begin(), embedding_score.begin()+sample_m-1, maxScoreCmp);
   int predict_positive_number = 0;
-  for (auto it = embedding_score.begin(); it != embedding_score.begin() + sample_m; ++it) {
+  for (auto it = embedding_score.begin(); it != embedding_score.begin()+sample_m; ++it) {
     int i = it->second.first;
     int j = it->second.second;
-    if(pedge_set.find(make_pair(i,j)) !=pedge_set.end()){
+    if(pedge_set.find(make_pair(i,j)) != pedge_set.end()){
       predict_positive_number ++;
     }
   }
-  cout << methodname << "link prediction precision: " << predict_positive_number/ (double) (sample_m) << endl;
+  cout << methodname << " link prediction precision: " << predict_positive_number/ (double) (sample_m) << endl;
 }
 
 

@@ -1,3 +1,4 @@
+
 # Scalable Graph Embeddings via Sparse Transpose Proximities
 
 
@@ -20,13 +21,14 @@ Datasets used in our paper are provided in [NR_Dataset](https://github.com/yinyu
 bash compile.sh
 ```
 
+
 ## Usage
 We provide two versions of the code to ensure reproducibility.
 ### STRAP based on SVD
-Written mainly by [Eigen](https://eigen.tuxfamily.org/dox/index.html), which is a free software that can handle many different linear algebra operations and also has a geometry framework. Furthermore, the code is mature, well maintained, well tested, and has good documentation.  
+We write a SVD version based on Eigen 3.X, which is a free software that can handle many different linear algebra operations and also has a geometry framework.  
 
 ```
-./STRAP_SVD_U <graph_name> <data_path> <emb_path> <alpha> <mode> <iteration> <error> <threads>
+./STRAP_SVD_U <graph_name> <data_path> <emb_path> <alpha> <iteration> <error> <threads>
 ```
 **Parameters**
 
@@ -34,10 +36,6 @@ Written mainly by [Eigen](https://eigen.tuxfamily.org/dox/index.html), which is 
 - data_path: path to load source file 
 - emb_path: path to save embedding files
 - alpha: parameter for *PPR*
-- mode
-	- 1: take *log* of each value
-	- 2: take *loglog* of each value
-	- 3: do nothing
 - iteration: parameter for *SVD*
 - error: parameter for *Backward Push*
 - threads
@@ -46,22 +44,22 @@ Written mainly by [Eigen](https://eigen.tuxfamily.org/dox/index.html), which is 
 
 For undirected graph:
 ```
-./STRAP_SVD_U BlogCatalog-u NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
+./STRAP_SVD_U BlogCatalog-u NR_Dataset/ NR_EB/ 0.5 12 0.00001 24
 ```
 
 For directed graph:
 ```
-./STRAP_SVD_D wikivote NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
+./STRAP_SVD_D wikivote NR_Dataset/ NR_EB/ 0.5 12 0.00001 24
 ```
 
 
 ### STRAP based on frPCA
-In this version we make use of [Intel Math Kernel Library](https://software.intel.com/en-us/mkl) to get better performance.
+***Results in our paper are all based on this version.***
 
-Running time in our paper is based on this version. 
+In this version we make use of [frPCA](https://github.com/XuFengthucs/frPCA_sparse) to get better performance.
 
 ```
-./STRAP_FRPCA_U <graph_name> <data_path> <emb_path> <alpha> <mode> <iteration> <error> <threads>
+./STRAP_FRPCA_U <graph_name> <data_path> <emb_path> <alpha> <iteration> <error> <threads>
 ```
 
 **Parameters**
@@ -75,12 +73,12 @@ Others are the same as above.
 
 For undirected graph:
 ```
-./STRAP_FRPCA_U BlogCatalog-u NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
+./STRAP_FRPCA_U BlogCatalog-u NR_Dataset/ NR_EB/ 0.5 12 0.00001 24
 ```
 
 For directed graph:
 ```
-./STRAP_FRPCA_D wikivote NR_Dataset/ NR_EB/ 0.5 1 12 0.00001 24
+./STRAP_FRPCA_D wikivote NR_Dataset/ NR_EB/ 0.5 12 0.00001 24
 ```
 
 
@@ -121,7 +119,7 @@ Then get embeddings of the training set. Predict missing edges via score $s_u
  
 ### Node Classification
 Generate a classifier using the embeddings of full graph, the provided labels and the training set. The performance is evaluated in terms of average Micro-F1 and average Macro-F1.
-This part is implemented in Python 3.4 and [sklearn 0.20.1](https://scikit-learn.org/stable/):
+This part is implemented in Python 3.4 and sklearn 0.20.1:
 
 ```
 python labelclassification.py BlogCatalog-u strap_frpca_u

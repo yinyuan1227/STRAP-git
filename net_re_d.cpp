@@ -1,13 +1,9 @@
 #include <algorithm>
 #include <iostream>
-#include <string>
 #include <sstream>
-#include <cstdlib>
 #include <vector>
 #include <unordered_map>
 #include "Graph.h"
-#include <fstream>
-#include <cstring>
 #include "Eigen/Dense"
 #include "SVD.h"
 
@@ -32,15 +28,9 @@ M load_csv(const std::string &path) {
   return Map<const Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, RowMajor>>(values.data(), rows, values.size()/rows);
 }
 
-
 bool maxScoreCmp(const pair<double, pair<int, int>> &a, const pair<double, pair<int, int>> &b) {
   return a.first > b.first;
 }
-
-bool maxScoreCmpPair(const pair<int, double> &a, const pair<int, double> &b) {
-  return a.second > b.second;
-}
-
 
 const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
 
@@ -58,16 +48,16 @@ int main(int argc, char **argv) {
   MatrixXf V = load_csv<MatrixXf>(inVfile);
   int d = U.cols();
 
-
-  //sample a subgraph using random edge induction method
+  // if graph size > 100000, use sampled graph, otherwise use original graph
+  // sample a subgraph using random edge induction method
   srand((unsigned) time(0));
   cout << "Constructing sample graph using edge induction..." << endl;
   int sample_init_m = g.m;
   if (g.n >= 100000) {
-    sample_init_m = min(100000, g.m); //if graph size > 100000, use sampled graph, otherwise use original graph
+    sample_init_m = min(100000, g.m);
   }
 
-  //uniform sample sample_init_m edges
+  // uniform sample sample_init_m edges
   int *edge_array = new int[2 * g.m];
   int edge_index = 0;
   for (int i = 0; i < g.n; i++) {
@@ -88,7 +78,7 @@ int main(int argc, char **argv) {
     edge_array[2 * i + 1] = temp2;
   }
 
-  //use the end points of sampled edge to induce a graph
+  // use the end points of sampled edge to induce a graph
   unordered_map<int, int> random_nodes_set;
   int sample_n = 0;
   for (int i = 0; i < 2 * sample_init_m; i++) {
@@ -101,7 +91,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  //construct submatrix for sampled subgraph
+  // construct submatrix for sampled subgraph
   int sample_m = 0;
   BitMatrix adjMatrix_sample;
   adjMatrix_sample.ConBitMatrix(sample_n);
@@ -128,6 +118,7 @@ int main(int argc, char **argv) {
     Vsample.row(x.second) = V.row(x.first);
   }
   clock_t start_sample_reconstruction = clock();
+
   MatrixXf appr_matrix_sample = Usample * Vsample.transpose();
   clock_t end_sample_reconstruction = clock();
   vector<pair<double, pair<int, int>>> all_appr_sample;
@@ -138,8 +129,8 @@ int main(int argc, char **argv) {
       }
     }
   }
-  nth_element(all_appr_sample.begin(), all_appr_sample.begin() + sample_m - 1, all_appr_sample.end(), maxScoreCmp);
-  sort(all_appr_sample.begin(), all_appr_sample.begin() + sample_m - 1, maxScoreCmp);
+  nth_element(all_appr_sample.begin(), all_appr_sample.begin()+sample_m-1, all_appr_sample.end(), maxScoreCmp);
+  sort(all_appr_sample.begin(), all_appr_sample.begin()+sample_m-1, maxScoreCmp);
   int predict_positive_number_appr_sample = 0;
   for (int k = 0; k < 10; k++) {
     for (int i = 0; i < display_step; i++) {
