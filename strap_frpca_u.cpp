@@ -216,7 +216,8 @@ int main(int argc,  char **argv){
   trMat.data().squeeze();
 
 
-  //frPCAt can only handle nnz < INT_MAX
+  // https://github.com/XuFengthucs/frPCA_sparse
+  // frPCAt can only handle nnz < INT_MAX
   nnz = ppr_matrix_temp.nonZeros();
   if (nnz > INT_MAX){
     cout << "nonzero entries overflow;" <<endl;

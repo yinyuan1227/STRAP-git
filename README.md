@@ -15,6 +15,16 @@ Besides, directed graph and undirected graph should be distinguished.
 
 Datasets used in our paper are provided in [NR_Dataset](https://github.com/yinyuan1227/STRAP-git/tree/master/NR_Dataset).
 
+|Data Set|Directed|N|M|
+|:------|:-----:|------:|------:|
+|[BlogCatalog](http://socialcomputing.asu.edu/datasets/BlogCatalog3)|No|10312|333983|
+|[Flickr](http://socialnetworks.mpi-sws.org/data-imc2007.html)|No|80513|5899882|
+|[YouTube](http://socialnetworks.mpi-sws.org/data-imc2007.html)|No|1138499|2990443|
+|[WikiVote](http://snap.stanford.edu/data/wiki-Vote.html)|Yes|7115|103689|
+|[Slashdot](http://snap.stanford.edu/data/soc-Slashdot0902.html)|Yes|82168|870161|
+|[Euro](https://github.com/leoribeiro/struc2vec/)|No|399|5993|
+|[Brazil](https://github.com/leoribeiro/struc2vec/)|No|131|1003|
+
 
 ## Compilations
 ```sh
@@ -25,7 +35,7 @@ bash compile.sh
 ## Usage
 We provide two versions of the code to ensure reproducibility.
 ### STRAP based on SVD
-We write a SVD version based on Eigen 3.X, which is a free software that can handle many different linear algebra operations and also has a geometry framework.  
+We write a SVD version based on *Eigen 3.x*.  
 
 ```
 ./STRAP_SVD_U <graph_name> <data_path> <emb_path> <alpha> <iteration> <error> <threads>
@@ -37,7 +47,7 @@ We write a SVD version based on Eigen 3.X, which is a free software that can han
 - emb_path: path to save embedding files
 - alpha: parameter for *PPR*
 - iteration: parameter for *SVD*
-- error: parameter for *Backward Push*
+- error: parameter for *[Backward Push](https://arxiv.org/abs/1507.05999)*
 - threads
 
 **Examples**
@@ -56,7 +66,7 @@ For directed graph:
 ### STRAP based on frPCA
 ***Results in our paper are all based on this version.***
 
-In this version we make use of [frPCA](https://github.com/XuFengthucs/frPCA_sparse) to get better performance.
+In this version we make use of *[frPCA](https://arxiv.org/abs/1810.06825)* to get better performance.
 
 ```
 ./STRAP_FRPCA_U <graph_name> <data_path> <emb_path> <alpha> <iteration> <error> <threads>
@@ -64,9 +74,9 @@ In this version we make use of [frPCA](https://github.com/XuFengthucs/frPCA_spar
 
 **Parameters**
 
-- iteration: parameter for *frPCA*
+- iteration: parameter for *[frPCA](https://arxiv.org/abs/1810.06825)*
 
-Others are the same as above.
+- others are the same as above
 
 
 **Examples**
