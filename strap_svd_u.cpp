@@ -23,6 +23,8 @@ bool maxScoreCmpTriplet(const Triplet<double>& a, const Triplet<double>& b){
   return a.value() > b.value();
 }
 
+const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
+
 void BackwardSearch(int* random_w, int start, int end, UGraph* g, double alpha, double residuemax, double reservemin, vector<Triplet<double>>* answer){
   // Computing all node PPR on G
   double* Residue = new double[g->n];
@@ -174,13 +176,13 @@ int main(int argc,  char **argv){
 
   cout << "deque to sparse matrix" << endl;
   // Rewrite SparseMatrix::setFromTriplets to optimize memory usage
-  SparseMatrix<float> ppr_matrix(g.n, g.n);
-  SparseMatrix<float> trMat(g.n, g.n);
+  SparseMatrix<double> ppr_matrix(g.n, g.n);
+  SparseMatrix<double> trMat(g.n, g.n);
   deque<Triplet<double>>::iterator it;
   long max_step = nnz / 2 + 1;
   long step = 0;
   while (nnz){
-    SparseMatrix<float>::IndexVector wi(trMat.outerSize());
+    SparseMatrix<double>::IndexVector wi(trMat.outerSize());
     wi.setZero();
     if (nnz < max_step){
       step = nnz;
@@ -198,11 +200,15 @@ int main(int argc,  char **argv){
 
     for (int j = 0; j < step; j++){
       it = TotalTripletList.begin();
-      trMat.insertBackUncompressed(it->row(), it->col()) = (float)log10(it->value() / reservemin);
+      double value1 = log10(it->value() / reservemin);
+      if (value1 > 0.0)
+        trMat.insertBackUncompressed(it->row(), it->col()) = value1;
+      else
+        cout << value1 << endl;
       TotalTripletList.erase(TotalTripletList.begin());
     }
 
-    trMat.collapseDuplicates(internal::scalar_sum_op<float, float>());
+    trMat.collapseDuplicates(internal::scalar_sum_op<double, double>());
   }
   deque<Triplet<double>>().swap(TotalTripletList);
 
@@ -217,19 +223,19 @@ int main(int argc,  char **argv){
 
 
   // Compute SVD
-  SVD::SVD<SparseMatrix<float>> svd(ppr_matrix, d, pass);
+  SVD::SVD<SparseMatrix<double>> svd(ppr_matrix, d, pass);
   auto end_eb_time = chrono::system_clock::now();
   auto elapsed_svd_time = chrono::duration_cast<std::chrono::seconds>(end_eb_time - svd_start_time);
   cout << "svd time: "<< elapsed_svd_time.count() << endl;
 
-  VectorXf vS = svd.singularValues();
-  double ppr_norm = ppr_matrix.norm()*ppr_matrix.norm();
-  double S_norm = vS.norm()*vS.norm();
-  cout << S_norm << " " << ppr_norm << " ratio: " << (double)S_norm/ppr_norm << endl;
+  VectorXd vS = svd.singularValues();
+  double S_norm = vS.squaredNorm();
+  double ppr_norm = ppr_matrix.squaredNorm();
+  cout << S_norm << " " << ppr_norm << " ratio: " << S_norm/ppr_norm << endl;
 
-  MatrixXf S = vS.cwiseSqrt().asDiagonal();
-  MatrixXf U = svd.matrixU()*S;
-  MatrixXf V = svd.matrixV()*S;
+  MatrixXd S = vS.cwiseSqrt().asDiagonal();
+  MatrixXd U = svd.matrixU()*S;
+  MatrixXd V = svd.matrixV()*S;
   outU << U.format(CSVFormat);
   outV << V.format(CSVFormat);
   auto end_time = chrono::system_clock::now();

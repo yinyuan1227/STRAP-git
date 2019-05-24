@@ -90,15 +90,15 @@ if __name__ == '__main__':
     dataset = sys.argv[1]
     alg = sys.argv[2]
 
-    embfile = '/home/dou/straptmp/NR_EB/' + dataset + '_' + alg + '_U.csv'
-    labelfile = '/home/dou/straptmp/LABEL/' + dataset + '.txt'
+    embfile = 'NR_EB/' + dataset + '_' + alg + '_U.csv'
+    labelfile = 'LABEL/' + dataset + '.txt'
 
     clf_ratio = [0.1, 0.3, 0.5, 0.7, 0.9]
     vectors = load_embeddings(embfile)
     X, Y = read_node_label(labelfile)
     print(embfile)
     for r in clf_ratio:
-        #print('Training classifier using {:.2f}% nodes...'.format(r * 100))
+        print('Training classifier using {:.2f}% nodes...'.format(r * 100))
         clf = Classifier(vectors=vectors, clf=LogisticRegression())
         results = clf.split_train_evaluate(X, Y, r)
         print(results['micro'])

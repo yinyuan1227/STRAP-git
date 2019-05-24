@@ -17,9 +17,9 @@ Datasets used in our paper are provided in [NR_Dataset](https://github.com/yinyu
 
 |Data Set|Directed|N|M|
 |:------|:-----:|------:|------:|
-|[BlogCatalog](http://socialcomputing.asu.edu/datasets/BlogCatalog3)|No|10312|333983|
-|[Flickr](http://socialnetworks.mpi-sws.org/data-imc2007.html)|No|80513|5899882|
-|[YouTube](http://socialnetworks.mpi-sws.org/data-imc2007.html)|No|1138499|2990443|
+|[BlogCatalog](http://socialcomputing.asu.edu/pages/datasets)|No|10312|333983|
+|[Flickr](http://socialcomputing.asu.edu/pages/datasets)|No|80513|5899882|
+|[YouTube](http://socialcomputing.asu.edu/pages/datasets)|No|1138499|2990443|
 |[WikiVote](http://snap.stanford.edu/data/wiki-Vote.html)|Yes|7115|103689|
 |[Slashdot](http://snap.stanford.edu/data/soc-Slashdot0902.html)|Yes|82168|870161|
 |[Euro](https://github.com/leoribeiro/struc2vec/)|No|399|5993|
@@ -30,6 +30,7 @@ Datasets used in our paper are provided in [NR_Dataset](https://github.com/yinyu
 ```sh
 bash compile.sh
 ```
+**Move the files in the frPCA folder to the root directory before compiling.**
 
 
 ## Usage
