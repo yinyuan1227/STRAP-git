@@ -141,4 +141,20 @@ python labelclassification.py BlogCatalog-u strap_frpca_u
 Please cite our paper if you choose to use our code. 
 
 ```
+@inproceedings{10.1145/3292500.3330860,
+author = {Yin, Yuan and Wei, Zhewei},
+title = {Scalable Graph Embeddings via Sparse Transpose Proximities},
+year = {2019},
+isbn = {9781450362016},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3292500.3330860},
+doi = {10.1145/3292500.3330860},
+booktitle = {Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining},
+pages = {1429–1437},
+numpages = {9},
+keywords = {network representation learning, personalized pagerank, graph embedding},
+location = {Anchorage, AK, USA},
+series = {KDD ’19}
+}
 ```
