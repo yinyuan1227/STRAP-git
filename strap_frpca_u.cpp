@@ -243,7 +243,6 @@ int main(int argc,  char **argv){
       ppr_matrix_coo->values[nnz_iter] = value1;
       ppr_norm += ppr_matrix_coo->values[nnz_iter]*ppr_matrix_coo->values[nnz_iter];
       nnz_iter ++;
-      }
     }
   }
   ppr_matrix_temp.resize(0,0);
