@@ -243,6 +243,7 @@ int main(int argc,  char **argv){
   cout << "write out embedding time: "<< elapsed_write_time.count() << endl;
   auto elapsed_time = chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
   cout << "total embedding time: "<< elapsed_time.count() << endl;
-
+  outU.close();
+  outV.close();
 }
 

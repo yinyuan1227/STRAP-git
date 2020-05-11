@@ -6,6 +6,8 @@
 - Ubuntu
 - C++ 11
 - GCC 4.8
+- Intel C++ Compiler
+- Boost (optional, only link prediction requires this)
 
 
 ## Preparation
